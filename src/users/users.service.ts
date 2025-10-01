@@ -9,14 +9,20 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../modules/prisma/prisma.service';
+import { User, Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll() {
-    const users = await this.prisma.user.findMany({
+  // Type assertion pour éviter les erreurs any
+  private get prismaClient() {
+    return this.prisma as any;
+  }
+
+  async findAll(): Promise<{ data: Partial<User>[]; total: number }> {
+    const users = await this.prismaClient.user.findMany({
       select: {
         id: true,
         email: true,
@@ -37,7 +43,7 @@ export class UsersService {
   }
 
   async findOne(id: string) {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prismaClient.user.findUnique({
       where: { id },
       select: {
         id: true,
@@ -74,8 +80,8 @@ export class UsersService {
     return user;
   }
 
-  async findByEmail(email: string) {
-    return this.prisma.user.findUnique({
+  async findByEmail(email: string): Promise<User | null> {
+    return this.prismaClient.user.findUnique({
       where: { email },
     });
   }
@@ -96,7 +102,7 @@ export class UsersService {
     // Hasher le mot de passe
     const hashedPassword = await bcrypt.hash(userData.password, 10);
 
-    const user = await this.prisma.user.create({
+    const user = await this.prismaClient.user.create({
       data: {
         ...userData,
         password: hashedPassword,
@@ -120,7 +126,7 @@ export class UsersService {
   }
 
   async update(id: string, updateData: any, currentUserId: string) {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prismaClient.user.findUnique({
       where: { id },
     });
 
@@ -138,7 +144,7 @@ export class UsersService {
       updateData.password = await bcrypt.hash(updateData.password, 10);
     }
 
-    const updated = await this.prisma.user.update({
+    const updated = await this.prismaClient.user.update({
       where: { id },
       data: updateData,
       select: {
@@ -159,7 +165,7 @@ export class UsersService {
   }
 
   async remove(id: string, currentUserId: string) {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prismaClient.user.findUnique({
       where: { id },
     });
 
@@ -177,7 +183,7 @@ export class UsersService {
       throw new BadRequestException('Vous ne pouvez pas supprimer votre propre compte');
     }
 
-    await this.prisma.user.delete({
+    await this.prismaClient.user.delete({
       where: { id },
     });
 
@@ -191,7 +197,7 @@ export class UsersService {
   }
 
   private async isAdmin(userId: string): Promise<boolean> {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prismaClient.user.findUnique({
       where: { id: userId },
       select: { role: true },
     });
@@ -199,7 +205,7 @@ export class UsersService {
   }
 
   async getUserStats(userId: string) {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prismaClient.user.findUnique({
       where: { id: userId },
       include: {
         reservations: {
