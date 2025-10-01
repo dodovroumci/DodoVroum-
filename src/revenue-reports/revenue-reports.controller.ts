@@ -10,7 +10,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger'
 import { RevenueReportsService } from './revenue-reports.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../../common/decorators/roles.decorator';
+import { Roles } from '../common/decorators/roles.decorator';
 
 @ApiTags('Bilan des revenus')
 @ApiBearerAuth()
