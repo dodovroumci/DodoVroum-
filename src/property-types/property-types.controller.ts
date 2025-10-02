@@ -14,8 +14,8 @@ import { PropertyTypesService } from './property-types.service';
 import { CreatePropertyTypeDto } from './dto/create-property-type.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../common/decorators/roles.decorator';
-import { Public } from '../common/decorators/public.decorator';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { Public } from '../../common/decorators/public.decorator';
 
 @ApiTags('Types de propriétés')
 @Controller('property-types')

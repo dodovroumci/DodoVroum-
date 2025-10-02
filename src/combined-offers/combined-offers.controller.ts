@@ -16,8 +16,8 @@ import { CreateCombinedOfferDto } from './dto/create-combined-offer.dto';
 import { UpdateCombinedOfferDto } from './dto/update-combined-offer.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../common/decorators/roles.decorator';
-import { Public } from '../common/decorators/public.decorator';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { Public } from '../../common/decorators/public.decorator';
 
 @ApiTags('Offres combinées')
 @Controller('combined-offers')
