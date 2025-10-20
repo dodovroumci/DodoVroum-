@@ -1,0 +1,288 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Modèle Utilisateur
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  firstName String
+  lastName  String
+  role      UserRole @default(USER)
+  isVerified Boolean @default(false)
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  residences     Residence[]
+  vehicles       Vehicle[]
+  reservations   Reservation[]
+  reviews        Review[]
+  favorites      Favorite[]
+  payments       Payment[]
+  notifications  Notification[]
+  combinedOffers CombinedOffer[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  ADMIN
+  USER
+  HOST
+}
+
+// Modèle Type de Propriété
+model PropertyType {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  residences Residence[]
+
+  @@map("property_types")
+}
+
+// Modèle Résidence
+model Residence {
+  id            Int      @id @default(autoincrement())
+  title         String
+  description   String
+  address       String
+  city          String
+  country       String
+  pricePerNight Float
+  maxGuests     Int
+  bedrooms      Int
+  bathrooms     Int
+  amenities     Json?
+  images        Json?
+  rating        Float?
+  reviewCount   Int?
+  isAvailable   Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  hostId         Int
+  host           User         @relation(fields: [hostId], references: [id], onDelete: Cascade)
+  propertyTypeId Int
+  propertyType   PropertyType @relation(fields: [propertyTypeId], references: [id])
+  
+  reservations   Reservation[]
+  reviews        Review[]
+  favorites      Favorite[]
+  combinedOffers CombinedOfferResidence[]
+
+  @@map("residences")
+}
+
+// Modèle Véhicule
+model Vehicle {
+  id          Int      @id @default(autoincrement())
+  brand       String
+  model       String
+  year        Int
+  type        String
+  seats       Int
+  pricePerDay Float
+  rating      Float?
+  reviewCount Int?
+  isAvailable Boolean  @default(true)
+  location    String
+  description String?
+  images      Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  ownerId     Int
+  owner       User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  
+  reservations   Reservation[]
+  reviews        Review[]
+  favorites      Favorite[]
+  combinedOffers CombinedOfferVehicle[]
+
+  @@map("vehicles")
+}
+
+// Modèle Réservation
+model Reservation {
+  id        Int      @id @default(autoincrement())
+  startDate DateTime
+  endDate   DateTime
+  totalPrice Float
+  status    ReservationStatus @default(PENDING)
+  paymentStatus String? @default("PENDING")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  userId     Int
+  user       User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  residenceId Int?
+  residence  Residence? @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  vehicleId  Int?
+  vehicle    Vehicle? @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  combinedOfferId Int?
+
+  payments   Payment[]
+  reviews    Review[]
+
+  @@map("reservations")
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+// Modèle Avis
+model Review {
+  id        Int      @id @default(autoincrement())
+  rating    Int      @db.TinyInt
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  userId       Int
+  user         User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reservationId Int
+  reservation  Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  residenceId Int?
+  residence    Residence? @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  vehicleId   Int?
+  vehicle      Vehicle? @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  combinedOfferId Int?
+
+  @@map("reviews")
+}
+
+// Modèle Favoris
+model Favorite {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  // Relations
+  userId     Int
+  user       User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  residenceId Int?
+  residence  Residence? @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  vehicleId Int?
+  vehicle    Vehicle? @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@map("favorites")
+}
+
+// Modèle Paiement
+model Payment {
+  id          Int      @id @default(autoincrement())
+  amount      Float
+  currency    String   @default("XOF")
+  status      PaymentStatus @default(PENDING)
+  method      String
+  transactionId String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  userId       Int
+  user         User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reservationId Int
+  reservation  Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+// Modèle Notification
+model Notification {
+  id        Int      @id @default(autoincrement())
+  title     String
+  message   String
+  type      NotificationType
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+enum NotificationType {
+  RESERVATION
+  PAYMENT
+  REVIEW
+  SYSTEM
+}
+
+// Modèle Offre Combinée
+model CombinedOffer {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  totalPrice  Float
+  discount    Float?
+  isActive    Boolean  @default(true)
+  isAvailable Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  creatorId Int
+  creator   User @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  
+  residences CombinedOfferResidence[]
+  vehicles   CombinedOfferVehicle[]
+
+  @@map("combined_offers")
+}
+
+// Table de liaison pour les offres combinées et résidences
+model CombinedOfferResidence {
+  id           Int @id @default(autoincrement())
+  combinedOfferId Int
+  residenceId     Int
+
+  combinedOffer CombinedOffer @relation(fields: [combinedOfferId], references: [id], onDelete: Cascade)
+  residence     Residence     @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+
+  @@unique([combinedOfferId, residenceId])
+  @@map("combined_offer_residences")
+}
+
+// Table de liaison pour les offres combinées et véhicules
+model CombinedOfferVehicle {
+  id           Int @id @default(autoincrement())
+  combinedOfferId Int
+  vehicleId       Int
+
+  combinedOffer CombinedOffer @relation(fields: [combinedOfferId], references: [id], onDelete: Cascade)
+  vehicle       Vehicle       @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@unique([combinedOfferId, vehicleId])
+  @@map("combined_offer_vehicles")
+}
