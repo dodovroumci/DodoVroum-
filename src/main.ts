@@ -1,6 +1,3 @@
-// ==========================================
-// src/main.ts
-// ==========================================
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
@@ -11,12 +8,12 @@ async function bootstrap() {
 
   // Configuration CORS
   app.enableCors({
-    origin: '*', // À modifier en production
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:3000'],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
 
-  // Validation globale
+  // Configuration des pipes de validation
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -25,44 +22,31 @@ async function bootstrap() {
     }),
   );
 
-  // Préfixe global
-  app.setGlobalPrefix('api');
-
   // Configuration Swagger
   const config = new DocumentBuilder()
-    .setTitle('DodoVroum & CombotripCI API')
-    .setDescription('API Backend pour réservation et location en Côte d\'Ivoire')
+    .setTitle('DodoVroum API')
+    .setDescription('API pour la plateforme de réservation DodoVroum')
     .setVersion('1.0')
     .addBearerAuth()
-    .addTag('Authentification')
-    .addTag('Utilisateurs')
-    .addTag('Résidences')
-    .addTag('Véhicules')
-    .addTag('Offres combinées')
-    .addTag('Réservations')
-    .addTag('Favoris')
-    .addTag('Avis')
-    .addTag('Paiements')
-    .addTag('Notifications')
-    .addTag('Types de propriétés')
-    .addTag('Bilan des revenus')
+    .addTag('auth', 'Authentification')
+    .addTag('users', 'Utilisateurs')
+    .addTag('residences', 'Résidences')
+    .addTag('vehicles', 'Véhicules')
+    .addTag('offers', 'Offres combinées')
+    .addTag('bookings', 'Réservations')
+    .addTag('payments', 'Paiements')
+    .addTag('reviews', 'Avis')
+    .addTag('favorites', 'Favoris')
     .build();
-  
+
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document);
+  SwaggerModule.setup('api', app, document);
 
   const port = process.env.PORT || 3000;
   await app.listen(port);
   
-  console.log('');
-  console.log('═══════════════════════════════════════════════════════');
-  console.log('🚀 Application démarrée avec succès !');
-  console.log('═══════════════════════════════════════════════════════');
-  console.log(`📍 URL locale        : http://localhost:${port}`);
-  console.log(`📚 Documentation API : http://localhost:${port}/api/docs`);
-  console.log(`🔐 Environnement     : ${process.env.NODE_ENV || 'development'}`);
-  console.log('═══════════════════════════════════════════════════════');
-  console.log('');
+  console.log(`🚀 Serveur DodoVroum démarré sur le port ${port}`);
+  console.log(`📚 Documentation API disponible sur http://localhost:${port}/api`);
 }
 
 bootstrap();

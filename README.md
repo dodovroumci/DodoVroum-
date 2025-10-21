@@ -1,98 +1,326 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 🚀 DodoVroum Backend API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Backend API complet pour la plateforme de réservation DodoVroum - Réservations de résidences et véhicules.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## ✨ Fonctionnalités
 
-## Description
+### 🔐 Authentification & Autorisation
+- **Inscription/Connexion** avec JWT
+- **Rôles utilisateur** : Admin et Client
+- **Protection des routes** avec Guards
+- **Hachage sécurisé** des mots de passe
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+### 🏠 Gestion des Résidences
+- **CRUD complet** des résidences
+- **Recherche avancée** par ville, prix, équipements
+- **Gestion des images** et équipements
+- **Système de notation** intégré
 
-## Project setup
+### 🚗 Gestion des Véhicules
+- **CRUD complet** des véhicules
+- **Filtrage par type** (voiture, moto, vélo, etc.)
+- **Recherche par marque/modèle**
+- **Gestion des caractéristiques** techniques
 
-```bash
-$ npm install
+### 🎁 Offres Combinées
+- **Packages résidence + véhicule**
+- **Système de réduction** automatique
+- **Périodes de validité** configurables
+
+### 📅 Système de Réservations
+- **Réservations complètes** avec dates
+- **Statuts de réservation** (en attente, confirmée, annulée)
+- **Historique personnel** des réservations
+- **Notes et commentaires**
+
+### 💳 Gestion des Paiements
+- **Suivi des paiements** par réservation
+- **Statuts de paiement** (en attente, payé, échoué)
+- **Méthodes de paiement** multiples
+- **Historique des transactions**
+
+### ⭐ Système d'Avis
+- **Notation 1-5 étoiles**
+- **Commentaires détaillés**
+- **Avis par résidence/véhicule**
+- **Modération des avis**
+
+### ❤️ Liste de Favoris
+- **Ajout/suppression** de favoris
+- **Favoris par utilisateur**
+- **Gestion des résidences et véhicules**
+
+## 🛠️ Technologies Utilisées
+
+| Technologie | Version | Description |
+|-------------|---------|-------------|
+| **NestJS** | ^10.0.0 | Framework Node.js moderne et scalable |
+| **TypeScript** | ^5.1.3 | Langage fortement typé |
+| **Prisma ORM** | ^5.7.1 | Gestion de base de données |
+| **PostgreSQL** | Latest | Base de données relationnelle |
+| **JWT** | ^10.2.0 | Authentification sécurisée |
+| **Swagger** | ^7.1.17 | Documentation API automatique |
+| **bcrypt** | ^5.1.1 | Hachage des mots de passe |
+| **class-validator** | ^0.14.0 | Validation des données |
+
+## 📁 Structure du Projet
+
+```
+src/
+├── auth/                    # 🔐 Authentification
+│   ├── dto/                # DTOs pour login/register
+│   ├── guards/             # Guards d'authentification
+│   ├── strategies/         # Stratégies JWT et Local
+│   ├── auth.controller.ts  # Contrôleur d'auth
+│   ├── auth.service.ts     # Service d'auth
+│   └── auth.module.ts      # Module d'auth
+├── users/                  # 👤 Gestion des utilisateurs
+├── residences/             # 🏠 Gestion des résidences
+├── vehicles/               # 🚗 Gestion des véhicules
+├── offers/                 # 🎁 Offres combinées
+├── bookings/               # 📅 Réservations
+├── payments/               # 💳 Paiements
+├── reviews/                # ⭐ Avis et notes
+├── favorites/              # ❤️ Liste de favoris
+├── common/                 # 🔧 Utilitaires communs
+│   └── prisma/            # Service Prisma global
+├── app.module.ts           # Module principal
+└── main.ts                 # Point d'entrée
 ```
 
-## Compile and run the project
+## 🚀 Installation et Démarrage
 
+### 1. Prérequis
+- **Node.js** >= 18.0.0
+- **PostgreSQL** >= 13.0
+- **npm** ou **yarn**
+
+### 2. Installation
 ```bash
-# development
-$ npm run start
+# Cloner le projet
+git clone <repository-url>
+cd dodo-vroum-backend
 
-# watch mode
-$ npm run start:dev
+# Installer les dépendances
+npm install
 
-# production mode
-$ npm run start:prod
+# Configurer l'environnement
+cp env-template.txt .env
+# Éditer .env avec vos paramètres
 ```
 
-## Run tests
-
+### 3. Configuration Base de Données
 ```bash
-# unit tests
-$ npm run test
+# Générer le client Prisma
+npm run prisma:generate
 
-# e2e tests
-$ npm run test:e2e
+# Exécuter les migrations
+npm run prisma:migrate
 
-# test coverage
-$ npm run test:cov
+# (Optionnel) Seeder la base de données
+npm run prisma:seed
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
+### 4. Démarrage
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# Mode développement
+npm run start:dev
+
+# Mode production
+npm run build
+npm run start:prod
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## 📚 Documentation API
 
-## Resources
+Une fois le serveur démarré, la documentation Swagger est disponible à :
+**http://localhost:3000/api**
 
-Check out a few resources that may come in handy when working with NestJS:
+### Endpoints Principaux
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+#### 🔐 Authentification
+- `POST /auth/register` - Inscription
+- `POST /auth/login` - Connexion
 
-## Support
+#### 👤 Utilisateurs
+- `GET /users` - Liste des utilisateurs
+- `GET /users/:id` - Détails utilisateur
+- `PATCH /users/:id` - Modifier utilisateur
+- `DELETE /users/:id` - Supprimer utilisateur
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+#### 🏠 Résidences
+- `GET /residences` - Liste des résidences
+- `GET /residences/search?q=terme` - Recherche
+- `GET /residences/:id` - Détails résidence
+- `POST /residences` - Créer résidence
+- `PATCH /residences/:id` - Modifier résidence
+- `DELETE /residences/:id` - Supprimer résidence
 
-## Stay in touch
+#### 🚗 Véhicules
+- `GET /vehicles` - Liste des véhicules
+- `GET /vehicles/search?q=terme` - Recherche
+- `GET /vehicles/type/:type` - Par type
+- `GET /vehicles/:id` - Détails véhicule
+- `POST /vehicles` - Créer véhicule
+- `PATCH /vehicles/:id` - Modifier véhicule
+- `DELETE /vehicles/:id` - Supprimer véhicule
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+#### 🎁 Offres
+- `GET /offers` - Liste des offres
+- `GET /offers/:id` - Détails offre
+- `POST /offers` - Créer offre
+- `PATCH /offers/:id` - Modifier offre
+- `DELETE /offers/:id` - Supprimer offre
 
-## License
+#### 📅 Réservations
+- `GET /bookings` - Liste des réservations
+- `GET /bookings/my-bookings` - Mes réservations
+- `GET /bookings/:id` - Détails réservation
+- `POST /bookings` - Créer réservation
+- `PATCH /bookings/:id` - Modifier réservation
+- `DELETE /bookings/:id` - Supprimer réservation
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+#### 💳 Paiements
+- `GET /payments` - Liste des paiements
+- `GET /payments/my-payments` - Mes paiements
+- `GET /payments/:id` - Détails paiement
+- `POST /payments` - Créer paiement
+- `PATCH /payments/:id` - Modifier paiement
+
+#### ⭐ Avis
+- `GET /reviews` - Liste des avis
+- `GET /reviews/residence/:id` - Avis résidence
+- `GET /reviews/vehicle/:id` - Avis véhicule
+- `POST /reviews` - Créer avis
+- `PATCH /reviews/:id` - Modifier avis
+- `DELETE /reviews/:id` - Supprimer avis
+
+#### ❤️ Favoris
+- `GET /favorites` - Liste des favoris
+- `GET /favorites/my-favorites` - Mes favoris
+- `POST /favorites` - Ajouter aux favoris
+- `DELETE /favorites/:id` - Supprimer des favoris
+
+## 🔧 Scripts Disponibles
+
+```bash
+# Développement
+npm run start:dev          # Démarrer en mode watch
+npm run start:debug        # Démarrer en mode debug
+
+# Production
+npm run build              # Compiler le projet
+npm run start:prod         # Démarrer en production
+
+# Tests
+npm run test               # Tests unitaires
+npm run test:watch         # Tests en mode watch
+npm run test:e2e           # Tests end-to-end
+
+# Base de données
+npm run prisma:generate    # Générer le client Prisma
+npm run prisma:migrate     # Exécuter les migrations
+npm run prisma:studio      # Interface graphique Prisma
+npm run prisma:seed        # Seeder la base de données
+
+# Code Quality
+npm run lint               # Linter ESLint
+npm run format             # Formatter Prettier
+```
+
+## 🔐 Authentification
+
+L'API utilise JWT pour l'authentification. Pour accéder aux routes protégées :
+
+1. **Inscription/Connexion** via `/auth/register` ou `/auth/login`
+2. **Récupérer le token** dans la réponse
+3. **Ajouter le token** dans l'en-tête Authorization : `Bearer <token>`
+
+### Exemple d'utilisation
+```bash
+# Connexion
+curl -X POST http://localhost:3000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"client@dodovroum.com","password":"client123"}'
+
+# Utilisation du token
+curl -X GET http://localhost:3000/residences \
+  -H "Authorization: Bearer <votre-token>"
+```
+
+## 🗄️ Modèle de Données
+
+### Utilisateurs
+- Informations personnelles (nom, email, téléphone)
+- Rôles (ADMIN, CLIENT)
+- Statut actif/inactif
+
+### Résidences
+- Informations détaillées (titre, description, adresse)
+- Prix par jour et capacité
+- Équipements et images
+- Géolocalisation (ville, pays)
+
+### Véhicules
+- Caractéristiques techniques (marque, modèle, année)
+- Type de véhicule et prix
+- Équipements et images
+- Capacité et transmission
+
+### Réservations
+- Dates de début et fin
+- Prix total et statut
+- Liens vers utilisateur, résidence/véhicule/offre
+- Notes et commentaires
+
+### Paiements
+- Montant et devise
+- Méthode et statut de paiement
+- ID de transaction
+- Liens vers utilisateur et réservation
+
+## 🚀 Déploiement
+
+### Variables d'Environnement Requises
+```env
+DATABASE_URL="postgresql://user:password@localhost:5432/dodo_vroum_db"
+JWT_SECRET="votre-secret-jwt-super-securise"
+JWT_EXPIRES_IN="7d"
+PORT=3000
+NODE_ENV=production
+```
+
+### Docker (Optionnel)
+```dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+RUN npm run build
+EXPOSE 3000
+CMD ["npm", "run", "start:prod"]
+```
+
+## 🤝 Contribution
+
+1. Fork le projet
+2. Créer une branche feature (`git checkout -b feature/nouvelle-fonctionnalite`)
+3. Commit les changements (`git commit -m 'Ajouter nouvelle fonctionnalité'`)
+4. Push vers la branche (`git push origin feature/nouvelle-fonctionnalite`)
+5. Ouvrir une Pull Request
+
+## 📄 Licence
+
+Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
+
+## 🆘 Support
+
+Pour toute question ou problème :
+- Ouvrir une issue sur GitHub
+- Contacter l'équipe de développement
+- Consulter la documentation Swagger à `/api`
+
+---
+
+**Développé avec ❤️ par l'équipe DodoVroum**
