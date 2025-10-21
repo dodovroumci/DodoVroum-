@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  # Base de données de test
+  postgres-test:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: dodo_vroum_test
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Base de données de développement
+  postgres-dev:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: dodo_vroum_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Application de développement
+  app-dev:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://postgres:postgres@postgres-dev:5432/dodo_vroum_dev
+      JWT_SECRET: dev-secret-key
+      JWT_REFRESH_SECRET: dev-refresh-secret-key
+    depends_on:
+      postgres-dev:
+        condition: service_healthy
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm run start:dev
+
+volumes:
+  postgres_test_data:
+  postgres_dev_data:

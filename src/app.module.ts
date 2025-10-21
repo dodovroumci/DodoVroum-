@@ -11,6 +11,10 @@ import { BookingsModule } from './bookings/bookings.module';
 import { PaymentsModule } from './payments/payments.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { FavoritesModule } from './favorites/favorites.module';
+import { MonitoringModule } from './monitoring/monitoring.module';
+import { CacheConfigModule } from './cache/cache.module';
+import { LoggingModule } from './logging/logging.module';
+import { SecurityModule } from './security/security.module';
 
 @Module({
   imports: [
@@ -27,6 +31,12 @@ import { FavoritesModule } from './favorites/favorites.module';
         limit: 100, // 100 requêtes par minute
       },
     ]),
+    
+    // Modules de monitoring et sécurité
+    MonitoringModule,
+    CacheConfigModule,
+    LoggingModule,
+    SecurityModule,
     
     // Base de données
     PrismaModule,

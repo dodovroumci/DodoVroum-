@@ -29,6 +29,8 @@ model User {
   favorites Favorite[]
   payments  Payment[]
 
+  @@index([email])
+  @@index([isActive])
   @@map("users")
 }
 
@@ -56,6 +58,10 @@ model Residence {
   offers   Offer[]
   favorites Favorite[]
 
+  @@index([city])
+  @@index([pricePerDay])
+  @@index([isActive])
+  @@index([createdAt])
   @@map("residences")
 }
 
@@ -82,6 +88,11 @@ model Vehicle {
   offers   Offer[]
   favorites Favorite[]
 
+  @@index([brand])
+  @@index([type])
+  @@index([pricePerDay])
+  @@index([isActive])
+  @@index([createdAt])
   @@map("vehicles")
 }
 
@@ -105,6 +116,10 @@ model Offer {
   vehicle     Vehicle   @relation(fields: [vehicleId], references: [id])
   bookings    Booking[]
 
+  @@index([isActive])
+  @@index([validFrom])
+  @@index([validTo])
+  @@index([price])
   @@map("offers")
 }
 
@@ -131,6 +146,12 @@ model Booking {
   payments    Payment[]
   reviews     Review[]
 
+  // Contraintes d'intégrité
+  @@index([userId])
+  @@index([startDate])
+  @@index([endDate])
+  @@index([status])
+  @@index([createdAt])
   @@map("bookings")
 }
 
@@ -151,6 +172,10 @@ model Payment {
   bookingId   String
   booking     Booking   @relation(fields: [bookingId], references: [id])
 
+  @@index([userId])
+  @@index([bookingId])
+  @@index([status])
+  @@index([createdAt])
   @@map("payments")
 }
 
@@ -172,6 +197,12 @@ model Review {
   vehicleId   String?
   vehicle     Vehicle?   @relation(fields: [vehicleId], references: [id])
 
+  @@index([userId])
+  @@index([bookingId])
+  @@index([residenceId])
+  @@index([vehicleId])
+  @@index([rating])
+  @@index([createdAt])
   @@map("reviews")
 }
 
@@ -190,6 +221,8 @@ model Favorite {
 
   @@unique([userId, residenceId])
   @@unique([userId, vehicleId])
+  @@index([userId])
+  @@index([createdAt])
   @@map("favorites")
 }
 

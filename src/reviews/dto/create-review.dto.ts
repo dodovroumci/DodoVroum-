@@ -13,11 +13,6 @@ export class CreateReviewDto {
   @IsString()
   comment?: string;
 
-  @ApiProperty({ example: 'user-id-123', required: false })
-  @IsOptional()
-  @IsString()
-  userId?: string;
-
   @ApiProperty({ example: 'booking-id-123' })
   @IsString()
   bookingId: string;

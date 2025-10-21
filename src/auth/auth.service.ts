@@ -1,10 +1,12 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
 
 export interface LoginResponse {
   access_token: string;
+  refresh_token: string;
   user: {
     id: string;
     email: string;
@@ -14,26 +16,67 @@ export interface LoginResponse {
   };
 }
 
+export interface RefreshTokenPayload {
+  sub: string;
+  email: string;
+  role: string;
+  type: 'refresh';
+}
+
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    private configService: ConfigService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.usersService.findByEmail(email);
-    if (user && await bcrypt.compare(password, user.password)) {
-      const { password, ...result } = user;
-      return result;
+    if (!user) {
+      return null; // Ne pas révéler si l'utilisateur existe
     }
-    return null;
+
+    if (!user.isActive) {
+      return null; // Utilisateur désactivé
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return null; // Mot de passe incorrect
+    }
+
+    const { password: _, ...result } = user;
+    return result;
   }
 
   async login(user: any): Promise<LoginResponse> {
-    const payload = { email: user.email, sub: user.id, role: user.role };
+    const payload = { 
+      email: user.email, 
+      sub: user.id, 
+      role: user.role,
+      type: 'access'
+    };
+
+    const refreshPayload: RefreshTokenPayload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+      type: 'refresh'
+    };
+
+    const [access_token, refresh_token] = await Promise.all([
+      this.jwtService.signAsync(payload, {
+        expiresIn: this.configService.get<string>('JWT_EXPIRES_IN', '15m'),
+      }),
+      this.jwtService.signAsync(refreshPayload, {
+        expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_IN', '7d'),
+      }),
+    ]);
+
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token,
+      refresh_token,
       user: {
         id: user.id,
         email: user.email,
@@ -51,14 +94,19 @@ export class AuthService {
     lastName: string;
     phone?: string;
   }): Promise<LoginResponse> {
-    // Vérifier si l'utilisateur existe déjà
+    // Vérifier si l'utilisateur existe déjà (sans révéler l'existence)
     const existingUser = await this.usersService.findByEmail(registerData.email);
     if (existingUser) {
-      throw new UnauthorizedException('Un utilisateur avec cet email existe déjà');
+      throw new BadRequestException('Erreur lors de la création du compte');
     }
 
-    // Hacher le mot de passe
-    const hashedPassword = await bcrypt.hash(registerData.password, 10);
+    // Validation du mot de passe
+    if (registerData.password.length < 8) {
+      throw new BadRequestException('Le mot de passe doit contenir au moins 8 caractères');
+    }
+
+    // Hacher le mot de passe avec un salt plus fort
+    const hashedPassword = await bcrypt.hash(registerData.password, 12);
 
     // Créer l'utilisateur
     const user = await this.usersService.create({
@@ -66,17 +114,48 @@ export class AuthService {
       password: hashedPassword,
     });
 
-    // Générer le token
-    const payload = { email: user.email, sub: user.id, role: user.role };
-    return {
-      access_token: this.jwtService.sign(payload),
-      user: {
-        id: user.id,
+    // Générer les tokens
+    return this.login(user);
+  }
+
+  async refreshToken(refreshToken: string): Promise<{ access_token: string }> {
+    try {
+      const payload = await this.jwtService.verifyAsync(refreshToken, {
+        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+      });
+
+      if (payload.type !== 'refresh') {
+        throw new UnauthorizedException('Token invalide');
+      }
+
+      const user = await this.usersService.findById(payload.sub);
+      if (!user || !user.isActive) {
+        throw new UnauthorizedException('Utilisateur non trouvé ou inactif');
+      }
+
+      const accessPayload = {
         email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
+        sub: user.id,
         role: user.role,
-      },
-    };
+        type: 'access'
+      };
+
+      const access_token = await this.jwtService.signAsync(accessPayload, {
+        expiresIn: this.configService.get<string>('JWT_EXPIRES_IN', '15m'),
+      });
+
+      return { access_token };
+    } catch (error) {
+      throw new UnauthorizedException('Token de rafraîchissement invalide');
+    }
+  }
+
+  async logout(userId: string): Promise<void> {
+    // Dans une implémentation complète, on ajouterait le token à une blacklist
+    // Pour l'instant, on se contente de valider la demande
+    const user = await this.usersService.findById(userId);
+    if (!user) {
+      throw new UnauthorizedException('Utilisateur non trouvé');
+    }
   }
 }

@@ -2,6 +2,12 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
+import { ResponseInterceptor } from './common/interceptors/response.interceptor';
+import { MonitoringInterceptor } from './common/interceptors/monitoring.interceptor';
+import { MonitoringModule } from './monitoring/monitoring.module';
+import { CacheConfigModule } from './cache/cache.module';
+import { LoggingModule } from './logging/logging.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -19,8 +25,22 @@ async function bootstrap() {
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
     }),
   );
+
+  // Filtre d'exception global
+  app.useGlobalFilters(new GlobalExceptionFilter());
+
+  // Intercepteurs globaux
+  app.useGlobalInterceptors(new ResponseInterceptor());
+  
+  // Intercepteur de monitoring (doit être après ResponseInterceptor)
+  const monitoringModule = app.select(MonitoringModule);
+  const monitoringInterceptor = monitoringModule.get(MonitoringInterceptor);
+  app.useGlobalInterceptors(monitoringInterceptor);
 
   // Configuration Swagger
   const config = new DocumentBuilder()

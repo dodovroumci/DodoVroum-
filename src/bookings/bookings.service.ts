@@ -1,15 +1,39 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../common/prisma/prisma.service';
+import { BookingValidationService } from './services/booking-validation.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
 
 @Injectable()
 export class BookingsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private bookingValidationService: BookingValidationService,
+  ) {}
 
   async create(createBookingDto: CreateBookingDto) {
+    // Validation métier
+    await this.bookingValidationService.validateBooking(createBookingDto);
+
+    // Calcul automatique du prix si non fourni
+    let totalPrice = createBookingDto.totalPrice;
+    if (!totalPrice) {
+      totalPrice = await this.bookingValidationService.calculateTotalPrice(
+        createBookingDto.residenceId,
+        createBookingDto.vehicleId,
+        createBookingDto.offerId,
+        createBookingDto.startDate,
+        createBookingDto.endDate,
+      );
+    }
+
     return this.prisma.booking.create({
-      data: createBookingDto,
+      data: {
+        ...createBookingDto,
+        totalPrice,
+        startDate: new Date(createBookingDto.startDate),
+        endDate: new Date(createBookingDto.endDate),
+      },
       include: {
         user: {
           select: {

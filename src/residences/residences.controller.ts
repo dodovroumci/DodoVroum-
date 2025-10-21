@@ -3,6 +3,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@ne
 import { ResidencesService } from './residences.service';
 import { CreateResidenceDto } from './dto/create-residence.dto';
 import { UpdateResidenceDto } from './dto/update-residence.dto';
+import { PaginationDto } from '../common/dto/pagination.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('residences')
@@ -20,10 +21,10 @@ export class ResidencesController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Obtenir toutes les résidences' })
-  @ApiResponse({ status: 200, description: 'Liste des résidences' })
-  findAll() {
-    return this.residencesService.findAll();
+  @ApiOperation({ summary: 'Obtenir toutes les résidences avec pagination' })
+  @ApiResponse({ status: 200, description: 'Liste paginée des résidences' })
+  findAll(@Query() paginationDto: PaginationDto) {
+    return this.residencesService.findAll(paginationDto);
   }
 
   @Get('search')

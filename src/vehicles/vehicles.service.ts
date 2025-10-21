@@ -87,6 +87,7 @@ export class VehiclesService {
             OR: [
               { brand: { contains: query, mode: 'insensitive' } },
               { model: { contains: query, mode: 'insensitive' } },
+              { type: { contains: query, mode: 'insensitive' } },
             ],
           },
         ],
